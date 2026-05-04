@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 export const deps = {
   verifyToken: process.env.VERIFY_TOKEN,
   accessToken: process.env.ACCESS_TOKEN,
