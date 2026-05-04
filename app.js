@@ -1,5 +1,6 @@
-// Import Express.js
-const express = require("express");
+import express from "express";
+import { deps, checkEnv } from "./deps.js";
+import { parseMessage } from "./lib.js";
 
 // Create an Express app
 const app = express();
@@ -8,8 +9,8 @@ const app = express();
 app.use(express.json());
 
 // Set port and verify_token
-const port = process.env.PORT || 3000;
-const verifyToken = process.env.VERIFY_TOKEN;
+const port = deps.port || 3000;
+const verifyToken = deps.verifyToken;
 
 // Route for GET requests
 app.get("/", (req, res) => {
@@ -32,10 +33,18 @@ app.post("/", (req, res) => {
   const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
   console.log(`\n\nWebhook received ${timestamp}\n`);
   console.log(JSON.stringify(req.body, null, 2));
+
+  try {
+    parseMessage(req.body);
+  } catch (err) {
+    console.error(err);
+  }
+
   res.status(200).end();
 });
 
 // Start the server
 app.listen(port, () => {
+  checkEnv();
   console.log(`\nListening on port ${port}\n`);
 });
