@@ -1,4 +1,4 @@
-import { deps } from "./deps";
+import { deps } from "./deps.js";
 
 export async function sendMessage(to, message, context) {
   const res = await fetch(`${deps.apiURL}/${deps.phoneId}/messages`, {
