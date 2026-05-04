@@ -29,15 +29,17 @@ export async function parseMessage(body) {
 
   body.entry.forEach((entry) => {
     entry.changes.forEach((change) => {
-      change.messages.forEach((message) => {
-        const from = message.from;
-        const text = message.text.body;
-        const messageId = message.id;
+      if (change.field === "messages") {
+        change.value.messages.forEach((message) => {
+          const from = message.from;
+          const text = message.text.body;
+          const messageId = message.id;
 
-        sendMessage(from, `hey there! What did you say? ${text}`, {
-          message_id: messageId,
+          sendMessage(from, `hey there! What did you say? ${text}`, {
+            message_id: messageId,
+          });
         });
-      });
+      }
     });
   });
 }
