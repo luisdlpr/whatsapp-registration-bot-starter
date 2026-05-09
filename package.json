@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "tsx watch src/app.ts",
-    "build": "tsc",
-    "start": "node dist/app.js",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc && tsc-alias",
+    "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test src/tests/**/*.test.ts"
   },
@@ -28,6 +28,7 @@
     "@types/node": "^25.6.0",
     "@types/supertest": "^7.2.0",
     "supertest": "^7.2.2",
+    "tsc-alias": "^1.8.17",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3"
   }
