@@ -6,7 +6,7 @@
 - **Build**: `npm run build`
 - **Start** (production): `npm start`
 - **Typecheck**: `npm run typecheck`
-- **Test**: No test framework configured
+- **Test**: `npm test`
 
 > Always run `npm run typecheck` after making changes to verify correctness.
 
@@ -39,7 +39,8 @@ dist/                 # Compiled output (gitignored)
 
 ## Architecture
 
-- **src/app.ts**: Creates and starts the Express server; mounts routers
+- **src/app.ts**: Creates the Express app and exports it; starts the server unless `NODE_ENV=test`
+- **src/tests/**: `node:test` + `supertest` tests; set required env vars at the top of each file
 - **src/config.ts**: Loads `.env` via `dotenv`, validates and exports typed `config` object; throws on missing required vars
 - **src/routes/webhook.ts**: Handles WhatsApp webhook verification (GET) and incoming messages (POST)
 - **src/services/whatsapp.ts**: `sendMessage` and `parseMessage` — all WhatsApp Cloud API interactions

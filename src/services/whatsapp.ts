@@ -1,12 +1,12 @@
-import { config } from "../config.js";
+import { config } from "@/config.js";
 import type {
   Message,
   SendMessageContext,
   SendMessagePayload,
-  TextMessage,
+  // TextMessage,
   WhatsAppWebhookPayload,
-} from "../types/whatsapp.js";
-import { MessageHandler } from "../types/messageHandler.js";
+} from "@/types/whatsapp.js";
+import { MessageHandler } from "@/types/messageHandler.js";
 
 export class WhatsAppCloudAPIHandler implements MessageHandler {
   accessToken: string;
@@ -43,10 +43,12 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
     });
 
     const data = await res.json();
-    if (res.status === 200) {
-      // TODO: log
+    if (res.ok) {
+      console.log(`Replied to ${to}`);
     } else {
-      // TODO: log
+      console.log(
+        `Failed replying to ${to}, ${res.status}: ${res.statusText}, ${res.text()}`,
+      );
     }
 
     console.log(data);
@@ -114,11 +116,11 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
     return q;
   }
 
-  async reply(message: TextMessage) {
-    await this.sendMessage(
-      message.from_user_id,
-      `hey there! What did you say? ${message.text.body}`,
-      { message_id: message.id },
-    );
-  }
+  // async reply(message: TextMessage) {
+  //   await this.sendMessage(
+  //     message.from_user_id,
+  //     `hey there! What did you say? ${message.text.body}`,
+  //     { message_id: message.id },
+  //   );
+  // }
 }

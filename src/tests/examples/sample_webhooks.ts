@@ -8,7 +8,7 @@ import {
   WhatsAppChange,
   WhatsAppEntry,
   WhatsAppWebhookPayload,
-} from "./src/types/whatsapp.js";
+} from "@/types/whatsapp.js";
 
 // ---------------------------------------------------------------------------
 // Generic builder functions

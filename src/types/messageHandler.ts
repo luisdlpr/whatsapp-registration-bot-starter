@@ -2,7 +2,7 @@ import {
   Message,
   SendMessageContext,
   WhatsAppWebhookPayload,
-} from "./whatsapp";
+} from "@/types/whatsapp";
 
 export interface MessageHandler {
   sendMessage: (
@@ -14,4 +14,4 @@ export interface MessageHandler {
   parseMessage: (body: WhatsAppWebhookPayload) => Promise<Message[]>;
 }
 
-export interface MessageQueue {}
+export interface MessageQueue { }
