@@ -31,11 +31,12 @@ router.get("/", (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
   console.log(`\n\nWebhook received ${timestamp}\n`);
-  console.log(JSON.stringify(req.body, null, 2));
+  const body = req.body;
+  console.log(JSON.stringify(body, null, 2));
 
   try {
     const messages = await messageHandler.parseMessage(
-      req.body as WhatsAppWebhookPayload,
+      body as WhatsAppWebhookPayload,
     );
 
     for (const message of messages) {
@@ -50,6 +51,7 @@ router.post("/", async (req: Request, res: Response) => {
         const textMessage = message as TextMessage;
 
         await messageHandler.sendMessage(
+          textMessage.from,
           textMessage.from_user_id,
           `hey there! What did you say? ${textMessage.text.body}`,
           { message_id: textMessage.id },

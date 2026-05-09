@@ -20,13 +20,15 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
   }
 
   async sendMessage(
-    to: string,
+    to: string | undefined,
+    recipient: string /* uses user_id */,
     message: string,
     context?: SendMessageContext,
   ): Promise<void> {
     const payload: SendMessagePayload = {
       messaging_product: "whatsapp",
       to,
+      recipient,
       context,
       type: "text",
       text: { body: message },
@@ -42,16 +44,16 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json();
+    const jsonData = await res.json();
     if (res.ok) {
       console.log(`Replied to ${to}`);
     } else {
       console.log(
-        `Failed replying to ${to}, ${res.status}: ${res.statusText}, ${res.text()}`,
+        `Failed replying to ${to}, ${res.status}: ${res.statusText}, ${jsonData.error.code}`,
       );
     }
 
-    console.log(data);
+    console.log(jsonData);
     return;
   }
 

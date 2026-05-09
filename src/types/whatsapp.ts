@@ -137,7 +137,8 @@ export interface SendMessageContext {
 
 export interface SendMessagePayload {
   messaging_product: "whatsapp";
-  to: string;
+  to?: string;
+  recipient: string; // new field for bsuid's apparently defaults to 'to' if it exists
   context?: SendMessageContext;
   type: "text";
   text: { body: string };

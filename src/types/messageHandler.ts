@@ -6,7 +6,8 @@ import {
 
 export interface MessageHandler {
   sendMessage: (
-    to: string,
+    to: string | undefined,
+    recipient: string /* uses user_id */,
     message: string,
     context?: SendMessageContext,
   ) => Promise<void>;
