@@ -78,12 +78,12 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
     }
 
     for (const entry of body.entry) {
-      try {
-        this.repository.entry.create(entry);
-        this.repository.entry.flush();
-      } catch (error) {
-        logger.error("could not archive entry", { entry: entry.id, error });
-      }
+      // try {
+      //   this.repository.entry.create(entry);
+      //   this.repository.entry.flush();
+      // } catch (error) {
+      //   logger.error("could not archive entry", { entry: entry.id, error });
+      // }
       for (const change of entry.changes) {
         if (change.field !== "messages") {
           rejectWebhook("change field was not of type messages", {
