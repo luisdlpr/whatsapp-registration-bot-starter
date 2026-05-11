@@ -19,7 +19,7 @@ function makeTextMessage(
     id: string;
     from_user_id: string;
     timestamp: string;
-  },
+  }
 ): TextMessage {
   return {
     type: "text",
@@ -33,7 +33,7 @@ function makeImageMessage(
     id: string;
     from_user_id: string;
     timestamp: string;
-  },
+  }
 ): ImageMessage {
   return {
     type: "image",
@@ -51,7 +51,7 @@ function makeInteractiveButtonReply(
     id: string;
     from_user_id: string;
     timestamp: string;
-  },
+  }
 ): InteractiveMessage {
   return {
     type: "interactive",
@@ -68,7 +68,7 @@ function makeInteractiveListReply(
     id: string;
     from_user_id: string;
     timestamp: string;
-  },
+  }
 ): InteractiveMessage {
   return {
     type: "interactive",
@@ -89,7 +89,7 @@ function makeLocationMessage(
     id: string;
     from_user_id: string;
     timestamp: string;
-  },
+  }
 ): LocationMessage {
   return {
     type: "location",
@@ -108,7 +108,7 @@ function makeSentStatus(
     id: string;
     recipient_id: string;
     timestamp: string;
-  },
+  }
 ): Status {
   return {
     status: "sent",
@@ -132,7 +132,7 @@ function makeDeliveredStatus(
     id: string;
     recipient_id: string;
     timestamp: string;
-  },
+  }
 ): Status {
   return {
     status: "delivered",
@@ -150,7 +150,7 @@ function makeReadStatus(
     id: string;
     recipient_id: string;
     timestamp: string;
-  },
+  }
 ): Status {
   return {
     status: "read",
@@ -163,7 +163,7 @@ function makeFailedStatus(
     id: string;
     recipient_id: string;
     timestamp: string;
-  },
+  }
 ): Status {
   return {
     status: "failed",
@@ -508,7 +508,7 @@ export const outboundMarketingSent: WhatsAppWebhookPayload = makeWebhookPayload(
         ],
       }),
     ]),
-  ],
+  ]
 );
 
 // ---------------------------------------------------------------------------
@@ -728,7 +728,7 @@ export const multiEntryMultiTenant: WhatsAppWebhookPayload = makeWebhookPayload(
         ],
       }),
     ]),
-  ],
+  ]
 );
 
 // ---------------------------------------------------------------------------

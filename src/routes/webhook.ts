@@ -9,7 +9,7 @@ import { logger } from "@/lib/logger";
 const messageHandler: MessageHandler = new WhatsAppCloudAPIHandler(
   config.accessToken,
   config.apiURL,
-  config.phoneId,
+  config.phoneId
 );
 
 const router = Router();
@@ -36,7 +36,7 @@ router.post("/", async (req: Request, res: Response) => {
 
   try {
     const messages = await messageHandler.parseMessage(
-      body as WhatsAppWebhookPayload,
+      body as WhatsAppWebhookPayload
     );
 
     for (const message of messages) {
@@ -54,9 +54,9 @@ router.post("/", async (req: Request, res: Response) => {
           textMessage.from,
           textMessage.from_user_id,
           `hey there! What did you say? ${textMessage.text.body}`,
-          { message_id: textMessage.id },
+          { message_id: textMessage.id }
         );
-      } catch (err) {
+      } catch {
         logger.error(`failed to respond to message`, { message: message.id });
       }
     }

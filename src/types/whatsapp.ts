@@ -20,7 +20,7 @@ export interface WhatsAppChange {
       display_phone_number: string; // human readable number
       phone_number_id: string; // internal id of number
     };
-    contacts?: any[]; // optional/unreliable field
+    contacts?: unknown[]; // optional/unreliable field
 
     // next two are mutually exclusive
     // not necessarily in-order, check timestamps

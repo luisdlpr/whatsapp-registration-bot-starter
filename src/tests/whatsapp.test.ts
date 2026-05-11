@@ -13,11 +13,11 @@ process.env["NODE_ENV"] = "test";
 const handler = new WhatsAppCloudAPIHandler(
   "test-access-token",
   "https://example.com",
-  "test-phone-id",
+  "test-phone-id"
 );
 
 const makePayload = (
-  overrides: Partial<WhatsAppWebhookPayload> = {},
+  overrides: Partial<WhatsAppWebhookPayload> = {}
 ): WhatsAppWebhookPayload => ({
   object: "whatsapp_business_account",
   entry: [
@@ -60,7 +60,7 @@ describe("WhatsAppCloudAPIHandler.parseMessage", () => {
 
   it("returns empty array when object is not whatsapp_business_account", async () => {
     const messages = await handler.parseMessage(
-      makePayload({ object: "other" }),
+      makePayload({ object: "other" })
     );
 
     assert.equal(messages.length, 0);
@@ -186,7 +186,7 @@ describe("WhatsAppCloudAPIHandler.parseMessage", () => {
       testMessageWebhooks.map(async (webhookBody: WhatsAppWebhookPayload) => {
         const extractedMessages = await handler.parseMessage(webhookBody);
         extractedMessages.forEach((m) => mockMessageQueue.push(m));
-      }),
+      })
     );
 
     assert.equal(mockMessageQueue.length, 11);
@@ -207,8 +207,8 @@ describe("WhatsAppCloudAPIHandler.parseMessage", () => {
     ].forEach((id) =>
       assert(
         messageIds.includes(id),
-        `Message ${id} was not in MessageIds ${JSON.stringify(messageIds, null, 2)}`,
-      ),
+        `Message ${id} was not in MessageIds ${JSON.stringify(messageIds, null, 2)}`
+      )
     );
   });
 });

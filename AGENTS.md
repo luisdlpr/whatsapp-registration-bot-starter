@@ -6,9 +6,13 @@
 - **Build**: `npm run build`
 - **Start** (production): `npm start`
 - **Typecheck**: `npm run typecheck`
+- **Lint**: `npm run lint`
+- **Lint + autofix**: `npm run lint:fix`
+- **Format**: `npm run format`
+- **Format check**: `npm run format:check`
 - **Test**: `npm test`
 
-> Always run `npm run typecheck` after making changes to verify correctness.
+> Always run `npm run typecheck` and `npm run lint` after making changes to verify correctness.
 
 ## Project Structure
 

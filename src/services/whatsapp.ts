@@ -23,7 +23,7 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
     to: string | undefined,
     recipient: string /* uses user_id */,
     message: string,
-    context?: SendMessageContext,
+    context?: SendMessageContext
   ): Promise<void> {
     const payload: SendMessagePayload = {
       messaging_product: "whatsapp",

@@ -9,10 +9,10 @@ export interface MessageHandler {
     to: string | undefined,
     recipient: string /* uses user_id */,
     message: string,
-    context?: SendMessageContext,
+    context?: SendMessageContext
   ) => Promise<void>;
 
   parseMessage: (body: WhatsAppWebhookPayload) => Promise<Message[]>;
 }
 
-export interface MessageQueue { }
+export type MessageQueue = Record<string, never>;

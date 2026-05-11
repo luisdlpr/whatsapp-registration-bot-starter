@@ -4,7 +4,7 @@ import { logger } from "../lib/logger.js";
 export function requestLogger(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): void {
   const start = Date.now();
 

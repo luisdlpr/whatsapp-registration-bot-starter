@@ -13,7 +13,7 @@ function shouldLog(level: Level): boolean {
 function format(
   level: Level,
   message: string,
-  meta?: Record<string, unknown>,
+  meta?: Record<string, unknown>
 ): string {
   const ts = new Date().toISOString();
   const base = `[${ts}] [${level.toUpperCase()}] ${message}`;
