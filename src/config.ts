@@ -4,8 +4,9 @@ interface Config {
   verifyToken: string;
   accessToken: string;
   phoneId: string;
-  port: number;
   apiURL: string;
+  port: number;
+  logLevel: string;
 }
 
 function requireEnv(key: string): string {
@@ -20,7 +21,7 @@ export function checkEnv(): void {
   const required = ["VERIFY_TOKEN", "ACCESS_TOKEN", "WA_PH_ID", "WA_API_URL"];
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {
-    console.warn(`Missing environment variables: ${missing.join(", ")}`);
+    console.warn(`missing environment variables: ${missing.join(", ")}`);
   }
 }
 
@@ -29,6 +30,7 @@ export const config: Config = {
   accessToken: requireEnv("ACCESS_TOKEN"),
   phoneId: requireEnv("WA_PH_ID"),
   port: parseInt(process.env.PORT ?? "3000", 10),
+  logLevel: process.env.LOG_LEVEL ?? "info",
   apiURL: requireEnv("WA_API_URL"),
 };
 

@@ -4,6 +4,7 @@ import { config } from "@/config.js";
 import { WhatsAppCloudAPIHandler } from "@/services/whatsapp.js";
 import type { TextMessage, WhatsAppWebhookPayload } from "@/types/whatsapp.js";
 import { MessageHandler } from "@/types/messageHandler.js";
+import { logger } from "@/lib/logger";
 
 const messageHandler: MessageHandler = new WhatsAppCloudAPIHandler(
   config.accessToken,
@@ -21,7 +22,7 @@ router.get("/", (req: Request, res: Response) => {
   } = req.query as Record<string, string>;
 
   if (mode === "subscribe" && token === config.verifyToken) {
-    console.log("WEBHOOK VERIFIED");
+    logger.info("webhook verified");
     res.status(200).send(challenge);
   } else {
     res.status(403).end();
@@ -29,10 +30,9 @@ router.get("/", (req: Request, res: Response) => {
 });
 
 router.post("/", async (req: Request, res: Response) => {
-  const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
-  console.log(`\n\nWebhook received ${timestamp}\n`);
   const body = req.body;
-  console.log(JSON.stringify(body, null, 2));
+  logger.info("webhook received");
+  logger.debug("webhook body", { body });
 
   try {
     const messages = await messageHandler.parseMessage(
@@ -42,9 +42,9 @@ router.post("/", async (req: Request, res: Response) => {
     for (const message of messages) {
       try {
         if (message.type !== "text") {
-          console.log(
-            `No supported response for messages of type ${message.type}`,
-          );
+          logger.debug("no supported response for messages of this type", {
+            type: message.type,
+          });
           continue;
         }
 
@@ -57,11 +57,11 @@ router.post("/", async (req: Request, res: Response) => {
           { message_id: textMessage.id },
         );
       } catch (err) {
-        console.error(`failed to respond to message ${message.id}`);
+        logger.error(`failed to respond to message`, { message: message.id });
       }
     }
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    logger.error(`something went wrong`, { error });
   }
 
   res.status(200).end();

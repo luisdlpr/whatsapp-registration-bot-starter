@@ -1,17 +1,18 @@
 import app from "@/app.js";
 import { config } from "@/config.js";
+import { logger } from "./lib/logger";
 
 process.on("exit", (code) => {
-  console.log("Process exiting:", code);
+  logger.info("process exiting:", { code });
 });
 
-process.on("uncaughtException", console.error);
-process.on("unhandledRejection", console.error);
+process.on("uncaughtException", logger.error);
+process.on("unhandledRejection", logger.error);
 
 if (process.env.NODE_ENV !== "test") {
   const server = app.listen(config.port, () => {
-    console.log(`\nListening on port ${config.port}\n`);
+    logger.info(`listening on port`, { port: config.port });
   });
 
-  console.log(`Server state: ${server.listening}`);
+  logger.info(`Server state`, { listening: server.listening });
 }

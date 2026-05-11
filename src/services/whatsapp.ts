@@ -3,10 +3,10 @@ import type {
   Message,
   SendMessageContext,
   SendMessagePayload,
-  // TextMessage,
   WhatsAppWebhookPayload,
 } from "@/types/whatsapp.js";
 import { MessageHandler } from "@/types/messageHandler.js";
+import { logger } from "@/lib/logger";
 
 export class WhatsAppCloudAPIHandler implements MessageHandler {
   accessToken: string;
@@ -46,14 +46,10 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
 
     const jsonData = await res.json();
     if (res.ok) {
-      console.log(`Replied to ${to}`);
+      logger.info(`replied to ${to}`);
     } else {
-      console.log(
-        `Failed replying to ${to}, ${res.status}: ${res.statusText}, ${jsonData.error.code}`,
-      );
+      logger.error(`failed to reply to ${to}`, { body: jsonData });
     }
-
-    console.log(jsonData);
     return;
   }
 
@@ -61,15 +57,14 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
     // add to an in memory queue?
     const q = [];
 
-    const rejectWebhook = (subject: string, message: string) => {
-      console.log(`Rejecting webhook ${subject}: ${message}`);
+    const rejectWebhook = (reason: string, meta?: Record<string, unknown>) => {
+      logger.debug(`rejecting webhook: ${reason}`, meta);
     };
 
     if (body.object !== "whatsapp_business_account") {
-      rejectWebhook(
-        body.object,
-        "object was not of type whatsapp_business_account",
-      );
+      rejectWebhook("object was not of type whatsapp_business_account", {
+        objectId: body.object,
+      });
 
       return [];
     }
@@ -77,10 +72,10 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
     for (const entry of body.entry) {
       for (const change of entry.changes) {
         if (change.field !== "messages") {
-          rejectWebhook(
-            `entry=${entry.id} change=${change.field}`,
-            "change field was not of type messages",
-          );
+          rejectWebhook("change field was not of type messages", {
+            entry: entry.id,
+            change: change.field,
+          });
 
           continue;
         }
@@ -88,28 +83,35 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
         if (change.value.messages) {
           for (const message of change.value.messages) {
             if (message.type !== "text") {
-              rejectWebhook(
-                `entry=${entry.id} change=${change.field} message=${message.type}`,
-                "message was not of type text",
-              );
+              rejectWebhook("message was not of type text", {
+                entry: entry.id,
+                change: change.field,
+                message: message.type,
+              });
               continue;
             }
 
             q.push(message);
+            logger.info("message received", {
+              entry: entry.id,
+              message: message.id,
+            });
           }
         } else if (change.value.statuses) {
           for (const status of change.value.statuses) {
-            rejectWebhook(
-              `entry=${entry.id} change=${change.field} status=${status.id}, ${status.status}`,
-              "statuses are currently not ingested",
-            );
+            rejectWebhook("statuses are currently not ingested", {
+              entry: entry.id,
+              change: change.field,
+              statusId: status.id,
+              status: status.status,
+            });
             continue;
           }
         } else {
-          rejectWebhook(
-            `entry=${entry.id} change=${change.field}`,
-            "change value has no content",
-          );
+          rejectWebhook("change value has no content", {
+            entry: entry.id,
+            change: change.field,
+          });
           continue;
         }
       }
@@ -117,12 +119,4 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
 
     return q;
   }
-
-  // async reply(message: TextMessage) {
-  //   await this.sendMessage(
-  //     message.from_user_id,
-  //     `hey there! What did you say? ${message.text.body}`,
-  //     { message_id: message.id },
-  //   );
-  // }
 }
