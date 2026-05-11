@@ -7,6 +7,7 @@ interface Config {
   apiURL: string;
   port: number;
   logLevel: string;
+  environment: string;
 }
 
 function requireEnv(key: string): string {
@@ -32,6 +33,7 @@ export const config: Config = {
   port: parseInt(process.env.PORT ?? "3000", 10),
   logLevel: process.env.LOG_LEVEL ?? "info",
   apiURL: requireEnv("WA_API_URL"),
+  environment: process.env.NODE_ENV ?? "dev",
 };
 
 checkEnv();

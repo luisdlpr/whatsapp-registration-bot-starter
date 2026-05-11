@@ -1,11 +1,28 @@
 import express from "express";
-import webhookRouter from "@/routes/webhook.js";
+import createWebhookRouter from "@/routes/webhook.js";
+import createDebugRouter from "@/routes/debug.js";
 import { requestLogger } from "./middleware/requestLogger.js";
+import { Repository } from "./types/repository.js";
+import { SqliteRepository } from "./services/sqliteRepository.js";
+import { MessageHandler } from "./types/messageHandler.js";
+import { WhatsAppCloudAPIHandler } from "./services/whatsapp.js";
+import { config } from "./config.js";
 
 const app = express();
 
+const repository: Repository = new SqliteRepository("database.db");
+const messageHandler: MessageHandler = new WhatsAppCloudAPIHandler(
+  config.accessToken,
+  config.apiURL,
+  config.phoneId,
+  repository
+);
+
 app.use(express.json());
 app.use(requestLogger);
-app.use("/", webhookRouter);
+app.use("/", createWebhookRouter(repository, messageHandler));
+if (config.environment !== "prod") {
+  app.use("/debug", createDebugRouter(repository));
+}
 
 export default app;

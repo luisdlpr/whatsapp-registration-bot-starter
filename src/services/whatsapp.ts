@@ -7,16 +7,24 @@ import type {
 } from "@/types/whatsapp.js";
 import { MessageHandler } from "@/types/messageHandler.js";
 import { logger } from "@/lib/logger";
+import { Repository } from "@/types/repository";
 
 export class WhatsAppCloudAPIHandler implements MessageHandler {
   accessToken: string;
   apiUrl: string;
   phoneId: string;
+  repository: Repository;
 
-  constructor(accessToken: string, apiUrl: string, phoneId: string) {
+  constructor(
+    accessToken: string,
+    apiUrl: string,
+    phoneId: string,
+    repository: Repository
+  ) {
     this.accessToken = accessToken;
     this.apiUrl = apiUrl;
     this.phoneId = phoneId; // change to use metadata
+    this.repository = repository;
   }
 
   async sendMessage(
@@ -70,6 +78,12 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
     }
 
     for (const entry of body.entry) {
+      try {
+        this.repository.entry.create(entry);
+        this.repository.entry.flush();
+      } catch (error) {
+        logger.error("could not archive entry", { entry: entry.id, error });
+      }
       for (const change of entry.changes) {
         if (change.field !== "messages") {
           rejectWebhook("change field was not of type messages", {

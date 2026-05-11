@@ -1,8 +1,9 @@
-import { describe, it } from "node:test";
+import { beforeEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { WhatsAppCloudAPIHandler } from "@/services/whatsapp.js";
 import type { Message, WhatsAppWebhookPayload } from "@/types/whatsapp.js";
 import { testMessageWebhooks } from "./examples/sample_webhooks";
+import { SqliteRepository } from "@/services/sqliteRepository";
 
 process.env["VERIFY_TOKEN"] = "test-verify-token";
 process.env["ACCESS_TOKEN"] = "test-access-token";
@@ -10,10 +11,12 @@ process.env["WA_PH_ID"] = "test-phone-id";
 process.env["WA_API_URL"] = "https://example.com";
 process.env["NODE_ENV"] = "test";
 
+const repository = new SqliteRepository("help.db");
 const handler = new WhatsAppCloudAPIHandler(
   "test-access-token",
   "https://example.com",
-  "test-phone-id"
+  "test-phone-id",
+  repository
 );
 
 const makePayload = (
@@ -50,6 +53,9 @@ const makePayload = (
 });
 
 describe("WhatsAppCloudAPIHandler.parseMessage", () => {
+  beforeEach(async () => {
+    await repository.entry.flush(0);
+  });
   it("returns text messages from a valid payload", async () => {
     const messages = await handler.parseMessage(makePayload());
 
@@ -184,6 +190,7 @@ describe("WhatsAppCloudAPIHandler.parseMessage", () => {
 
     await Promise.all(
       testMessageWebhooks.map(async (webhookBody: WhatsAppWebhookPayload) => {
+        await repository.entry.flush(0);
         const extractedMessages = await handler.parseMessage(webhookBody);
         extractedMessages.forEach((m) => mockMessageQueue.push(m));
       })
