@@ -8,6 +8,7 @@ interface Config {
   port: number;
   logLevel: string;
   environment: string;
+  dbName: string;
 }
 
 function requireEnv(key: string): string {
@@ -19,7 +20,13 @@ function requireEnv(key: string): string {
 }
 
 export function checkEnv(): void {
-  const required = ["VERIFY_TOKEN", "ACCESS_TOKEN", "WA_PH_ID", "WA_API_URL"];
+  const required = [
+    "VERIFY_TOKEN",
+    "ACCESS_TOKEN",
+    "WA_PH_ID",
+    "WA_API_URL",
+    "DB_NAME",
+  ];
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {
     console.warn(`missing environment variables: ${missing.join(", ")}`);
@@ -33,6 +40,7 @@ export const config: Config = {
   port: parseInt(process.env.PORT ?? "3000", 10),
   logLevel: process.env.LOG_LEVEL ?? "info",
   apiURL: requireEnv("WA_API_URL"),
+  dbName: requireEnv("DB_NAME"),
   environment: process.env.NODE_ENV ?? "dev",
 };
 

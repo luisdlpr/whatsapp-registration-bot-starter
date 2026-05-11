@@ -10,7 +10,7 @@ import { config } from "./config.js";
 
 const app = express();
 
-const repository: Repository = new SqliteRepository("database.db");
+const repository: Repository = new SqliteRepository(config.dbName);
 const messageHandler: MessageHandler = new WhatsAppCloudAPIHandler(
   config.accessToken,
   config.apiURL,
