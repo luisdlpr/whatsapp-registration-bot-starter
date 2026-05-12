@@ -78,12 +78,6 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
     }
 
     for (const entry of body.entry) {
-      // try {
-      //   this.repository.entry.create(entry);
-      //   this.repository.entry.flush();
-      // } catch (error) {
-      //   logger.error("could not archive entry", { entry: entry.id, error });
-      // }
       for (const change of entry.changes) {
         if (change.field !== "messages") {
           rejectWebhook("change field was not of type messages", {
@@ -96,6 +90,23 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
 
         if (change.value.messages) {
           for (const message of change.value.messages) {
+            try {
+              await this.repository.messages.create(message);
+              await this.repository.messages.flush();
+            } catch (error) {
+              const errorDetails =
+                error instanceof Error
+                  ? {
+                    message: error.message,
+                    stack: error.stack,
+                    cause: error.cause,
+                  }
+                  : error;
+              logger.error("could not log message to db", {
+                id: message.id,
+                error: errorDetails,
+              });
+            }
             if (message.type !== "text") {
               rejectWebhook("message was not of type text", {
                 entry: entry.id,
@@ -113,6 +124,24 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
           }
         } else if (change.value.statuses) {
           for (const status of change.value.statuses) {
+            try {
+              await this.repository.statuses.create(status);
+              await this.repository.statuses.flush();
+            } catch (error) {
+              const errorDetails =
+                error instanceof Error
+                  ? {
+                    message: error.message,
+                    stack: error.stack,
+                    cause: error.cause,
+                  }
+                  : error;
+              logger.error("could not log status to db", {
+                id: status.id,
+                error: errorDetails,
+              });
+            }
+
             rejectWebhook("statuses are currently not ingested", {
               entry: entry.id,
               change: change.field,

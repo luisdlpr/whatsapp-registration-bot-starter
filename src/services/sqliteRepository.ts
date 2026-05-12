@@ -1,8 +1,15 @@
 import { createDb, Db } from "@/db";
-import { WhatsAppEntriesDb, whatsAppEntriesDb } from "@/db/schema";
+import {
+  NewWhatsAppMessagesDb,
+  NewWhatsAppStatusesDb,
+  WhatsAppMessagesDb,
+  whatsappMessagesDb,
+  WhatsAppStatusesDb,
+  whatsappStatusesDb,
+} from "@/db/schema";
 import { logger } from "@/lib/logger";
 import { ProcessingStatus, Repository } from "@/types/repository";
-import { WhatsAppEntry } from "@/types/whatsapp";
+import { Message, Status, WhatsAppEntry } from "@/types/whatsapp";
 import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 
@@ -24,58 +31,125 @@ export class SqliteRepository implements Repository {
     });
   }
 
-  entry = {
+  messages = {
     create: async (
-      entry: WhatsAppEntry,
+      message: Message,
       status: ProcessingStatus = "pending"
     ): Promise<void> => {
-      const row = {
-        waEntryId: entry.id,
-        body: entry,
+      const row: NewWhatsAppMessagesDb = {
+        id: message.id,
+        timestamp: new Date(Number(message.timestamp) * 1000),
+        body: message,
         status,
       };
 
-      await this.db.insert(whatsAppEntriesDb).values(row);
-      logger.debug(`logged entry to db`, { waEntryId: entry.id });
+      await this.db.insert(whatsappMessagesDb).values(row);
+      logger.debug(`logged message to db`, { id: row.id });
     },
 
-    readAll: async (): Promise<WhatsAppEntriesDb[]> => {
-      return await this.db.query.whatsAppEntriesDb.findMany();
+    readAll: async (): Promise<WhatsAppMessagesDb[]> => {
+      return await this.db.query.whatsappMessagesDb.findMany();
     },
 
-    read: async (waEntryId: string): Promise<WhatsAppEntry> => {
-      const entry = await this.db.query.whatsAppEntriesDb.findFirst({
-        where: eq(whatsAppEntriesDb.waEntryId, waEntryId),
+    read: async (messageId: string): Promise<Message> => {
+      const message = await this.db.query.whatsappMessagesDb.findFirst({
+        where: eq(whatsappMessagesDb.id, messageId),
       });
 
-      if (!entry) {
-        throw new Error("entry not found");
+      if (!message) {
+        throw new Error("message not found");
       }
 
-      logger.debug(`read entry from db`, { waEntryId: entry.waEntryId });
-      return entry.body as WhatsAppEntry;
+      logger.debug(`read message from db`, { id: message.id });
+      return message.body as Message;
     },
-    flush: async (limit: number = 500): Promise<WhatsAppEntry[]> => {
-      const deletedEntriesDb = this.db.all<WhatsAppEntriesDb>(sql`
-        DELETE FROM wa_entries
-        WHERE wa_entry_id NOT IN (
-          SELECT wa_entry_id
-          FROM wa_entries
+    update: async (
+      messageId: string,
+      updates: Partial<NewWhatsAppMessagesDb>
+    ): Promise<void> => {
+      await this.db
+        .update(whatsappMessagesDb)
+        .set(updates)
+        .where(eq(whatsappMessagesDb.id, messageId));
+    },
+    flush: async (limit: number = 500): Promise<WhatsAppMessagesDb[]> => {
+      const deletedMessagesDb = this.db.all<WhatsAppMessagesDb>(sql`
+        DELETE FROM wa_messages
+        WHERE id NOT IN (
+          SELECT id
+          FROM wa_messages
           ORDER BY created_at DESC
           LIMIT ${limit}
         )
         RETURNING *
       `);
 
-      const deletedEntries = deletedEntriesDb.map(
-        (entry) => entry.body as WhatsAppEntry
-      );
-
-      logger.debug(`flushed entries in db`, {
+      logger.debug(`flushed messages in db`, {
         limit,
-        deletedEntries: deletedEntries.map((entry) => entry.id),
+        deletedMessages: deletedMessagesDb.map((row) => row.id),
       });
-      return deletedEntries;
+      return deletedMessagesDb;
+    },
+  };
+
+  statuses = {
+    create: async (
+      status: Status,
+      processingStatus: ProcessingStatus = "pending"
+    ): Promise<void> => {
+      const row: NewWhatsAppStatusesDb = {
+        id: status.id,
+        timestamp: new Date(Number(status.timestamp) * 1000),
+        body: status,
+        status: processingStatus,
+      };
+
+      await this.db.insert(whatsappStatusesDb).values(row);
+      logger.debug(`logged status to db`, { id: row.id });
+    },
+
+    readAll: async (): Promise<WhatsAppStatusesDb[]> => {
+      return await this.db.query.whatsappStatusesDb.findMany();
+    },
+
+    read: async (statusId: string): Promise<Status> => {
+      const status = await this.db.query.whatsappStatusesDb.findFirst({
+        where: eq(whatsappStatusesDb.id, statusId),
+      });
+
+      if (!status) {
+        throw new Error("status not found");
+      }
+
+      logger.debug(`read status from db`, { id: status.id });
+      return status.body as Status;
+    },
+    update: async (
+      statusId: string,
+      updates: Partial<NewWhatsAppStatusesDb>
+    ): Promise<void> => {
+      await this.db
+        .update(whatsappStatusesDb)
+        .set(updates)
+        .where(eq(whatsappStatusesDb.id, statusId));
+    },
+    flush: async (limit: number = 500): Promise<WhatsAppStatusesDb[]> => {
+      const deletedStatusesDb = this.db.all<WhatsAppStatusesDb>(sql`
+        DELETE FROM wa_statuses
+        WHERE id NOT IN (
+          SELECT id
+          FROM wa_statuses
+          ORDER BY created_at DESC
+          LIMIT ${limit}
+        )
+        RETURNING *
+      `);
+
+      logger.debug(`flushed statuses in db`, {
+        limit,
+        deletedStatuses: deletedStatusesDb.map((row) => row.id),
+      });
+      return deletedStatusesDb;
     },
   };
 }

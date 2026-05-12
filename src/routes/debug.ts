@@ -8,9 +8,14 @@ export default function createDebugRouter(repository: Repository) {
     res.status(200).send("Hello world");
   });
 
-  router.get("/entry/", async (req: Request, res: Response) => {
-    const entries = await repository.entry.readAll();
-    res.status(200).send(entries);
+  router.get("/messages/", async (req: Request, res: Response) => {
+    const messages = await repository.messages.readAll();
+    res.status(200).send(messages);
+  });
+
+  router.get("/statuses/", async (req: Request, res: Response) => {
+    const statuses = await repository.statuses.readAll();
+    res.status(200).send(statuses);
   });
 
   return router;

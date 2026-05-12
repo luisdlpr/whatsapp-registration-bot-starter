@@ -34,8 +34,9 @@ export type NewMessage = typeof messages.$inferInsert;
 
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
-export const whatsAppEntriesDb = sqliteTable("wa_entries", {
-  waEntryId: text("wa_entry_id").primaryKey(),
+export const whatsappMessagesDb = sqliteTable("wa_messages", {
+  id: text("id").primaryKey(),
+  timestamp: integer("timestamp", { mode: "timestamp" }).notNull(),
   body: text("body", { mode: "json" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .notNull()
@@ -43,5 +44,18 @@ export const whatsAppEntriesDb = sqliteTable("wa_entries", {
   status: text("status", { enum: ["pending", "processed", "failed"] }),
 });
 
-export type WhatsAppEntriesDb = typeof whatsAppEntriesDb.$inferSelect;
-export type NewWhatsAppEntriesDb = typeof whatsAppEntriesDb.$inferInsert;
+export type WhatsAppMessagesDb = typeof whatsappMessagesDb.$inferSelect;
+export type NewWhatsAppMessagesDb = typeof whatsappMessagesDb.$inferInsert;
+
+export const whatsappStatusesDb = sqliteTable("wa_statuses", {
+  id: text("id").primaryKey(),
+  timestamp: integer("timestamp", { mode: "timestamp" }).notNull(),
+  body: text("body", { mode: "json" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  status: text("status", { enum: ["pending", "processed", "failed"] }),
+});
+
+export type WhatsAppStatusesDb = typeof whatsappStatusesDb.$inferSelect;
+export type NewWhatsAppStatusesDb = typeof whatsappStatusesDb.$inferInsert;

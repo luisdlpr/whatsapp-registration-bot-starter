@@ -53,9 +53,6 @@ const makePayload = (
 });
 
 describe("WhatsAppCloudAPIHandler.parseMessage", () => {
-  beforeEach(async () => {
-    await repository.entry.flush(0);
-  });
   it("returns text messages from a valid payload", async () => {
     const messages = await handler.parseMessage(makePayload());
 
@@ -190,7 +187,6 @@ describe("WhatsAppCloudAPIHandler.parseMessage", () => {
 
     await Promise.all(
       testMessageWebhooks.map(async (webhookBody: WhatsAppWebhookPayload) => {
-        await repository.entry.flush(0);
         const extractedMessages = await handler.parseMessage(webhookBody);
         extractedMessages.forEach((m) => mockMessageQueue.push(m));
       })
