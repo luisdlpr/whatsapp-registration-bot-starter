@@ -18,5 +18,10 @@ export default function createDebugRouter(repository: Repository) {
     res.status(200).send(statuses);
   });
 
+  router.get("/registrations/", async (req: Request, res: Response) => {
+    const statuses = await repository.registeredUsers.readAll();
+    res.status(200).send(statuses);
+  });
+
   return router;
 }

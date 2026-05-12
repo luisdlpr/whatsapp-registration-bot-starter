@@ -35,6 +35,7 @@ export interface Repository {
   registeredUsers: {
     create(waUserId: string): Promise<RegisteredUser>;
     read(waUserId: string): Promise<RegisteredUser | null>;
+    readAll(): Promise<RegisteredUser[]>;
     update(
       waUserId: string,
       fields: Partial<

@@ -211,6 +211,11 @@ export class SqliteRepository implements Repository {
       return row ? rowToUser(row) : null;
     },
 
+    readAll: async (): Promise<RegisteredUser[]> => {
+      const rows = await this.db.query.registeredUsersDb.findMany();
+      return rows.map((r) => rowToUser(r));
+    },
+
     update: async (
       waUserId: string,
       fields: Partial<
