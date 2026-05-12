@@ -97,10 +97,10 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
               const errorDetails =
                 error instanceof Error
                   ? {
-                    message: error.message,
-                    stack: error.stack,
-                    cause: error.cause,
-                  }
+                      message: error.message,
+                      stack: error.stack,
+                      cause: error.cause,
+                    }
                   : error;
               logger.error("could not log message to db", {
                 id: message.id,
@@ -131,10 +131,10 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
               const errorDetails =
                 error instanceof Error
                   ? {
-                    message: error.message,
-                    stack: error.stack,
-                    cause: error.cause,
-                  }
+                      message: error.message,
+                      stack: error.stack,
+                      cause: error.cause,
+                    }
                   : error;
               logger.error("could not log status to db", {
                 id: status.id,

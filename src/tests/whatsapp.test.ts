@@ -1,4 +1,4 @@
-import { beforeEach, describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { WhatsAppCloudAPIHandler } from "@/services/whatsapp.js";
 import type { Message, WhatsAppWebhookPayload } from "@/types/whatsapp.js";

@@ -9,7 +9,7 @@ import {
 } from "@/db/schema";
 import { logger } from "@/lib/logger";
 import { ProcessingStatus, Repository } from "@/types/repository";
-import { Message, Status, WhatsAppEntry } from "@/types/whatsapp";
+import { Message, Status } from "@/types/whatsapp";
 import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 
