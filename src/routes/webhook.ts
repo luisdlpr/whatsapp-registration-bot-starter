@@ -4,10 +4,10 @@ import { config } from "@/config.js";
 import type { TextMessage, WhatsAppWebhookPayload } from "@/types/whatsapp.js";
 import { MessageHandler } from "@/types/messageHandler.js";
 import { logger } from "@/lib/logger";
-import { Repository } from "@/types/repository";
+import { RegistrationStateMachine } from "@/services/registrationStateMachine.js";
 
 export default function createWebhookRouter(
-  repository: Repository,
+  stateMachine: RegistrationStateMachine,
   messageHandler: MessageHandler
 ): Router {
   const router = Router();
@@ -47,13 +47,19 @@ export default function createWebhookRouter(
           }
 
           const textMessage = message as TextMessage;
+          const waUserId = textMessage.from_user_id;
+          const input = textMessage.text.body;
 
-          await messageHandler.sendMessage(
-            textMessage.from,
-            textMessage.from_user_id,
-            `hey there! What did you say? ${textMessage.text.body}`,
-            { message_id: textMessage.id }
-          );
+          const { reply, user } = await stateMachine.process(waUserId, input);
+
+          logger.info("registration state machine processed message", {
+            waUserId,
+            state: user.registrationState,
+          });
+
+          await messageHandler.sendMessage(textMessage.from, waUserId, reply, {
+            message_id: textMessage.id,
+          });
         } catch {
           logger.error(`failed to respond to message`, { message: message.id });
         }

@@ -34,6 +34,7 @@ export type NewMessage = typeof messages.$inferInsert;
 
 import { index } from "drizzle-orm/sqlite-core";
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import type { RegistrationState } from "@/types/registration";
 
 export const whatsappMessageEventsDb = sqliteTable(
   "wa_message_events",
@@ -73,3 +74,34 @@ export const whatsappStatusEventsDb = sqliteTable(
 export type WhatsAppStatusEventsDb = typeof whatsappStatusEventsDb.$inferSelect;
 export type NewWhatsAppStatusEventsDb =
   typeof whatsappStatusEventsDb.$inferInsert;
+
+export const registeredUsersDb = sqliteTable(
+  "registered_users",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    waUserId: text("wa_user_id").notNull().unique(),
+    registrationState: text("registration_state")
+      .notNull()
+      .$type<RegistrationState>(),
+    name: text("name"),
+    email: text("email"),
+    phone: text("phone"),
+    platformUpdatesOptIn: integer("platform_updates_opt_in", {
+      mode: "boolean",
+    }),
+    earlyAccessOptIn: integer("early_access_opt_in", { mode: "boolean" }),
+    club: text("club"),
+    city: text("city"),
+    role: text("role"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [index("registered_users_wa_user_id_idx").on(table.waUserId)]
+);
+
+export type RegisteredUserDb = typeof registeredUsersDb.$inferSelect;
+export type NewRegisteredUserDb = typeof registeredUsersDb.$inferInsert;

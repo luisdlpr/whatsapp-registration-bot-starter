@@ -1,3 +1,21 @@
+CREATE TABLE `registered_users` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`wa_user_id` text NOT NULL,
+	`registration_state` text NOT NULL,
+	`name` text,
+	`email` text,
+	`phone` text,
+	`platform_updates_opt_in` integer,
+	`early_access_opt_in` integer,
+	`club` text,
+	`city` text,
+	`role` text,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `registered_users_wa_user_id_unique` ON `registered_users` (`wa_user_id`);--> statement-breakpoint
+CREATE INDEX `registered_users_wa_user_id_idx` ON `registered_users` (`wa_user_id`);--> statement-breakpoint
 CREATE TABLE `wa_message_events` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`message_id` text,

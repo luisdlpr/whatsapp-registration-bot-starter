@@ -5,6 +5,7 @@ import {
   WhatsAppStatusEventsDb,
 } from "@/db/schema";
 import { Message, Status } from "./whatsapp";
+import { RegisteredUser, RegistrationState } from "./registration";
 
 export type ProcessingStatus = "pending" | "processed" | "failed";
 
@@ -29,5 +30,17 @@ export interface Repository {
       updates: Partial<NewWhatsAppStatusEventsDb>
     ): Promise<void>;
     flush(limit?: number): Promise<WhatsAppStatusEventsDb[]>;
+  };
+
+  registeredUsers: {
+    create(waUserId: string): Promise<RegisteredUser>;
+    read(waUserId: string): Promise<RegisteredUser | null>;
+    update(
+      waUserId: string,
+      fields: Partial<
+        Omit<RegisteredUser, "id" | "waUserId" | "createdAt" | "updatedAt">
+      > & { registrationState?: RegistrationState }
+    ): Promise<RegisteredUser>;
+    delete(waUserId: string): Promise<void>;
   };
 }

@@ -6,12 +6,38 @@ import {
   whatsappMessageEventsDb,
   WhatsAppStatusEventsDb,
   whatsappStatusEventsDb,
+  registeredUsersDb,
+  RegisteredUserDb,
 } from "@/db/schema";
 import { logger } from "@/lib/logger";
 import { ProcessingStatus, Repository } from "@/types/repository";
 import { Message, Status } from "@/types/whatsapp";
+import {
+  RegisteredUser,
+  RegistrationState,
+  City,
+  Role,
+} from "@/types/registration";
 import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+
+function rowToUser(row: RegisteredUserDb): RegisteredUser {
+  return {
+    id: row.id,
+    waUserId: row.waUserId,
+    registrationState: row.registrationState,
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    platformUpdatesOptIn: row.platformUpdatesOptIn,
+    earlyAccessOptIn: row.earlyAccessOptIn,
+    club: row.club,
+    city: row.city as City | null,
+    role: row.role as Role | null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
 
 export class SqliteRepository implements Repository {
   db: Db;
@@ -66,6 +92,7 @@ export class SqliteRepository implements Repository {
       });
       return messages.map((m) => m.body as Message);
     },
+
     update: async (
       eventId: number,
       updates: Partial<NewWhatsAppMessageEventsDb>
@@ -75,6 +102,7 @@ export class SqliteRepository implements Repository {
         .set(updates)
         .where(eq(whatsappMessageEventsDb.id, eventId));
     },
+
     flush: async (limit: number = 500): Promise<WhatsAppMessageEventsDb[]> => {
       const deletedMessagesDb = this.db.all<WhatsAppMessageEventsDb>(sql`
         DELETE FROM wa_message_events
@@ -132,6 +160,7 @@ export class SqliteRepository implements Repository {
       });
       return statuses.map((s) => s.body as Status);
     },
+
     update: async (
       eventId: number,
       updates: Partial<NewWhatsAppStatusEventsDb>
@@ -141,6 +170,7 @@ export class SqliteRepository implements Repository {
         .set(updates)
         .where(eq(whatsappStatusEventsDb.id, eventId));
     },
+
     flush: async (limit: number = 500): Promise<WhatsAppStatusEventsDb[]> => {
       const deletedStatusesDb = this.db.all<WhatsAppStatusEventsDb>(sql`
         DELETE FROM wa_status_events
@@ -161,6 +191,46 @@ export class SqliteRepository implements Repository {
         })),
       });
       return deletedStatusesDb;
+    },
+  };
+
+  registeredUsers = {
+    create: async (waUserId: string): Promise<RegisteredUser> => {
+      const result = await this.db
+        .insert(registeredUsersDb)
+        .values({ waUserId, registrationState: "awaiting_name" })
+        .returning();
+      logger.debug("registered user created", { waUserId });
+      return rowToUser(result[0]);
+    },
+
+    read: async (waUserId: string): Promise<RegisteredUser | null> => {
+      const row = await this.db.query.registeredUsersDb.findFirst({
+        where: eq(registeredUsersDb.waUserId, waUserId),
+      });
+      return row ? rowToUser(row) : null;
+    },
+
+    update: async (
+      waUserId: string,
+      fields: Partial<
+        Omit<RegisteredUser, "id" | "waUserId" | "createdAt" | "updatedAt">
+      > & { registrationState?: RegistrationState }
+    ): Promise<RegisteredUser> => {
+      const result = await this.db
+        .update(registeredUsersDb)
+        .set({ ...fields, updatedAt: new Date() })
+        .where(eq(registeredUsersDb.waUserId, waUserId))
+        .returning();
+      logger.debug("registered user updated", { waUserId, fields });
+      return rowToUser(result[0]);
+    },
+
+    delete: async (waUserId: string): Promise<void> => {
+      await this.db
+        .delete(registeredUsersDb)
+        .where(eq(registeredUsersDb.waUserId, waUserId));
+      logger.debug("registered user deleted", { waUserId });
     },
   };
 }
