@@ -1,4 +1,4 @@
-# wa-bot-test
+# WhatsApp Registration Bot
 
 ## Commands
 
