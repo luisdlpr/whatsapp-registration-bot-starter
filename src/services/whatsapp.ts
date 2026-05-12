@@ -91,8 +91,8 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
         if (change.value.messages) {
           for (const message of change.value.messages) {
             try {
-              await this.repository.messages.create(message);
-              await this.repository.messages.flush();
+              await this.repository.messageEvents.create(message);
+              await this.repository.messageEvents.flush();
             } catch (error) {
               const errorDetails =
                 error instanceof Error
@@ -125,8 +125,8 @@ export class WhatsAppCloudAPIHandler implements MessageHandler {
         } else if (change.value.statuses) {
           for (const status of change.value.statuses) {
             try {
-              await this.repository.statuses.create(status);
-              await this.repository.statuses.flush();
+              await this.repository.statusEvents.create(status);
+              await this.repository.statusEvents.flush();
             } catch (error) {
               const errorDetails =
                 error instanceof Error

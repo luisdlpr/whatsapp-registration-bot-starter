@@ -9,12 +9,12 @@ export default function createDebugRouter(repository: Repository) {
   });
 
   router.get("/messages/", async (req: Request, res: Response) => {
-    const messages = await repository.messages.readAll();
+    const messages = await repository.messageEvents.readAll();
     res.status(200).send(messages);
   });
 
   router.get("/statuses/", async (req: Request, res: Response) => {
-    const statuses = await repository.statuses.readAll();
+    const statuses = await repository.statusEvents.readAll();
     res.status(200).send(statuses);
   });
 

@@ -1,33 +1,33 @@
 import {
-  NewWhatsAppMessagesDb,
-  NewWhatsAppStatusesDb,
-  WhatsAppMessagesDb,
-  WhatsAppStatusesDb,
+  NewWhatsAppMessageEventsDb,
+  NewWhatsAppStatusEventsDb,
+  WhatsAppMessageEventsDb,
+  WhatsAppStatusEventsDb,
 } from "@/db/schema";
 import { Message, Status } from "./whatsapp";
 
 export type ProcessingStatus = "pending" | "processed" | "failed";
 
 export interface Repository {
-  messages: {
+  messageEvents: {
     create(message: Message, status?: ProcessingStatus): Promise<void>;
-    read(messageId: string): Promise<Message>;
-    readAll(): Promise<WhatsAppMessagesDb[]>;
+    read(messageId: string): Promise<Message[]>;
+    readAll(): Promise<WhatsAppMessageEventsDb[]>;
     update(
-      messageId: string,
-      updates: Partial<NewWhatsAppMessagesDb>
+      eventId: number,
+      updates: Partial<NewWhatsAppMessageEventsDb>
     ): Promise<void>;
-    flush(limit?: number): Promise<WhatsAppMessagesDb[]>;
+    flush(limit?: number): Promise<WhatsAppMessageEventsDb[]>;
   };
 
-  statuses: {
+  statusEvents: {
     create(status: Status, processingStatus?: ProcessingStatus): Promise<void>;
-    read(statusId: string): Promise<Status>;
-    readAll(): Promise<WhatsAppStatusesDb[]>;
+    read(statusId: string): Promise<Status[]>;
+    readAll(): Promise<WhatsAppStatusEventsDb[]>;
     update(
-      statusId: string,
-      updates: Partial<NewWhatsAppStatusesDb>
+      eventId: number,
+      updates: Partial<NewWhatsAppStatusEventsDb>
     ): Promise<void>;
-    flush(limit?: number): Promise<WhatsAppStatusesDb[]>;
+    flush(limit?: number): Promise<WhatsAppStatusEventsDb[]>;
   };
 }

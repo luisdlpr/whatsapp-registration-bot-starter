@@ -1,17 +1,24 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "77428134-1790-44da-bc67-3fdc31b29502",
+  "id": "590ce7d6-d92f-42d4-b66e-9a40d80bea14",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "wa_messages": {
-      "name": "wa_messages",
+    "wa_message_events": {
+      "name": "wa_message_events",
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
+          "autoincrement": true
+        },
+        "message_id": {
+          "name": "message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "timestamp": {
@@ -43,20 +50,35 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "wa_message_events_message_id_idx": {
+          "name": "wa_message_events_message_id_idx",
+          "columns": [
+            "message_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "wa_statuses": {
-      "name": "wa_statuses",
+    "wa_status_events": {
+      "name": "wa_status_events",
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true,
+          "autoincrement": true
+        },
+        "status_id": {
+          "name": "status_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "timestamp": {
@@ -88,7 +110,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "wa_status_events_status_id_idx": {
+          "name": "wa_status_events_status_id_idx",
+          "columns": [
+            "status_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

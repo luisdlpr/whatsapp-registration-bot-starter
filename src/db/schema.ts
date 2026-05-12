@@ -32,30 +32,44 @@ export type NewMessage = typeof messages.$inferInsert;
 
 */
 
+import { index } from "drizzle-orm/sqlite-core";
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
-export const whatsappMessagesDb = sqliteTable("wa_messages", {
-  id: text("id").primaryKey(),
-  timestamp: integer("timestamp", { mode: "timestamp" }).notNull(),
-  body: text("body", { mode: "json" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  status: text("status", { enum: ["pending", "processed", "failed"] }),
-});
+export const whatsappMessageEventsDb = sqliteTable(
+  "wa_message_events",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    messageId: text("message_id"),
+    timestamp: integer("timestamp", { mode: "timestamp" }).notNull(),
+    body: text("body", { mode: "json" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    status: text("status", { enum: ["pending", "processed", "failed"] }),
+  },
+  (table) => [index("wa_message_events_message_id_idx").on(table.messageId)]
+);
 
-export type WhatsAppMessagesDb = typeof whatsappMessagesDb.$inferSelect;
-export type NewWhatsAppMessagesDb = typeof whatsappMessagesDb.$inferInsert;
+export type WhatsAppMessageEventsDb =
+  typeof whatsappMessageEventsDb.$inferSelect;
+export type NewWhatsAppMessageEventsDb =
+  typeof whatsappMessageEventsDb.$inferInsert;
 
-export const whatsappStatusesDb = sqliteTable("wa_statuses", {
-  id: text("id").primaryKey(),
-  timestamp: integer("timestamp", { mode: "timestamp" }).notNull(),
-  body: text("body", { mode: "json" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  status: text("status", { enum: ["pending", "processed", "failed"] }),
-});
+export const whatsappStatusEventsDb = sqliteTable(
+  "wa_status_events",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    statusId: text("status_id"),
+    timestamp: integer("timestamp", { mode: "timestamp" }).notNull(),
+    body: text("body", { mode: "json" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    status: text("status", { enum: ["pending", "processed", "failed"] }),
+  },
+  (table) => [index("wa_status_events_status_id_idx").on(table.statusId)]
+);
 
-export type WhatsAppStatusesDb = typeof whatsappStatusesDb.$inferSelect;
-export type NewWhatsAppStatusesDb = typeof whatsappStatusesDb.$inferInsert;
+export type WhatsAppStatusEventsDb = typeof whatsappStatusEventsDb.$inferSelect;
+export type NewWhatsAppStatusEventsDb =
+  typeof whatsappStatusEventsDb.$inferInsert;

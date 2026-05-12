@@ -1,11 +1,11 @@
 import { createDb, Db } from "@/db";
 import {
-  NewWhatsAppMessagesDb,
-  NewWhatsAppStatusesDb,
-  WhatsAppMessagesDb,
-  whatsappMessagesDb,
-  WhatsAppStatusesDb,
-  whatsappStatusesDb,
+  NewWhatsAppMessageEventsDb,
+  NewWhatsAppStatusEventsDb,
+  WhatsAppMessageEventsDb,
+  whatsappMessageEventsDb,
+  WhatsAppStatusEventsDb,
+  whatsappStatusEventsDb,
 } from "@/db/schema";
 import { logger } from "@/lib/logger";
 import { ProcessingStatus, Repository } from "@/types/repository";
@@ -31,53 +31,56 @@ export class SqliteRepository implements Repository {
     });
   }
 
-  messages = {
+  messageEvents = {
     create: async (
       message: Message,
       status: ProcessingStatus = "pending"
     ): Promise<void> => {
-      const row: NewWhatsAppMessagesDb = {
-        id: message.id,
+      const row: NewWhatsAppMessageEventsDb = {
+        messageId: message.id,
         timestamp: new Date(Number(message.timestamp) * 1000),
         body: message,
         status,
       };
 
-      await this.db.insert(whatsappMessagesDb).values(row);
+      await this.db.insert(whatsappMessageEventsDb).values(row);
       logger.debug(`logged message to db`, { id: row.id });
     },
 
-    readAll: async (): Promise<WhatsAppMessagesDb[]> => {
-      return await this.db.query.whatsappMessagesDb.findMany();
+    readAll: async (): Promise<WhatsAppMessageEventsDb[]> => {
+      return await this.db.query.whatsappMessageEventsDb.findMany();
     },
 
-    read: async (messageId: string): Promise<Message> => {
-      const message = await this.db.query.whatsappMessagesDb.findFirst({
-        where: eq(whatsappMessagesDb.id, messageId),
+    read: async (messageId: string): Promise<Message[]> => {
+      const messages = await this.db.query.whatsappMessageEventsDb.findMany({
+        where: eq(whatsappMessageEventsDb.messageId, messageId),
       });
 
-      if (!message) {
+      if (!messages || messages.length <= 0) {
         throw new Error("message not found");
       }
 
-      logger.debug(`read message from db`, { id: message.id });
-      return message.body as Message;
+      logger.debug(`read message from db`, {
+        messageId,
+        eventIds: messages.map((m) => m.id),
+      });
+      return messages.map((m) => m.body as Message);
     },
     update: async (
-      messageId: string,
-      updates: Partial<NewWhatsAppMessagesDb>
+      eventId: number,
+      updates: Partial<NewWhatsAppMessageEventsDb>
     ): Promise<void> => {
       await this.db
-        .update(whatsappMessagesDb)
+        .update(whatsappMessageEventsDb)
         .set(updates)
-        .where(eq(whatsappMessagesDb.id, messageId));
+        .where(eq(whatsappMessageEventsDb.id, eventId));
     },
-    flush: async (limit: number = 500): Promise<WhatsAppMessagesDb[]> => {
-      const deletedMessagesDb = this.db.all<WhatsAppMessagesDb>(sql`
-        DELETE FROM wa_messages
+    flush: async (limit: number = 500): Promise<WhatsAppMessageEventsDb[]> => {
+      const deletedMessagesDb = this.db.all<WhatsAppMessageEventsDb>(sql`
+        DELETE FROM wa_message_events
         WHERE id NOT IN (
           SELECT id
-          FROM wa_messages
+          FROM wa_message_events
           ORDER BY created_at DESC
           LIMIT ${limit}
         )
@@ -86,59 +89,64 @@ export class SqliteRepository implements Repository {
 
       logger.debug(`flushed messages in db`, {
         limit,
-        deletedMessages: deletedMessagesDb.map((row) => row.id),
+        deletedMessages: deletedMessagesDb.map((row) => ({
+          id: row.id,
+          messageId: row.messageId,
+        })),
       });
       return deletedMessagesDb;
     },
   };
 
-  statuses = {
+  statusEvents = {
     create: async (
       status: Status,
       processingStatus: ProcessingStatus = "pending"
     ): Promise<void> => {
-      const row: NewWhatsAppStatusesDb = {
-        id: status.id,
+      const row: NewWhatsAppStatusEventsDb = {
+        statusId: status.id,
         timestamp: new Date(Number(status.timestamp) * 1000),
         body: status,
         status: processingStatus,
       };
 
-      await this.db.insert(whatsappStatusesDb).values(row);
+      await this.db.insert(whatsappStatusEventsDb).values(row);
       logger.debug(`logged status to db`, { id: row.id });
     },
 
-    readAll: async (): Promise<WhatsAppStatusesDb[]> => {
-      return await this.db.query.whatsappStatusesDb.findMany();
+    readAll: async (): Promise<WhatsAppStatusEventsDb[]> => {
+      return await this.db.query.whatsappStatusEventsDb.findMany();
     },
 
-    read: async (statusId: string): Promise<Status> => {
-      const status = await this.db.query.whatsappStatusesDb.findFirst({
-        where: eq(whatsappStatusesDb.id, statusId),
+    read: async (statusId: string): Promise<Status[]> => {
+      const statuses = await this.db.query.whatsappStatusEventsDb.findMany({
+        where: eq(whatsappStatusEventsDb.statusId, statusId),
       });
-
-      if (!status) {
+      if (!statuses || statuses.length <= 0) {
         throw new Error("status not found");
       }
 
-      logger.debug(`read status from db`, { id: status.id });
-      return status.body as Status;
+      logger.debug(`read status from db`, {
+        statusId,
+        eventIds: statuses.map((s) => s.id),
+      });
+      return statuses.map((s) => s.body as Status);
     },
     update: async (
-      statusId: string,
-      updates: Partial<NewWhatsAppStatusesDb>
+      eventId: number,
+      updates: Partial<NewWhatsAppStatusEventsDb>
     ): Promise<void> => {
       await this.db
-        .update(whatsappStatusesDb)
+        .update(whatsappStatusEventsDb)
         .set(updates)
-        .where(eq(whatsappStatusesDb.id, statusId));
+        .where(eq(whatsappStatusEventsDb.id, eventId));
     },
-    flush: async (limit: number = 500): Promise<WhatsAppStatusesDb[]> => {
-      const deletedStatusesDb = this.db.all<WhatsAppStatusesDb>(sql`
-        DELETE FROM wa_statuses
+    flush: async (limit: number = 500): Promise<WhatsAppStatusEventsDb[]> => {
+      const deletedStatusesDb = this.db.all<WhatsAppStatusEventsDb>(sql`
+        DELETE FROM wa_status_events
         WHERE id NOT IN (
           SELECT id
-          FROM wa_statuses
+          FROM wa_status_events
           ORDER BY created_at DESC
           LIMIT ${limit}
         )
@@ -147,7 +155,10 @@ export class SqliteRepository implements Repository {
 
       logger.debug(`flushed statuses in db`, {
         limit,
-        deletedStatuses: deletedStatusesDb.map((row) => row.id),
+        deletedStatuses: deletedStatusesDb.map((row) => ({
+          eventId: row.id,
+          statusId: row.statusId,
+        })),
       });
       return deletedStatusesDb;
     },
